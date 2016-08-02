@@ -7,14 +7,12 @@ MILONGA_DEBUG
 # Set transient time to infinite, so milonga will
 # wait for OpenFOAM until it ends.
 # end_time = infinite
-static_steps = 1000
+static_steps = 10000000
 
 # Make dt = 1. This does not affect milonga calculations
 # since it solves a steady-state problem.
 # Set for making time-steps named files.
 # dt = 1
-
-#PRINT %g step_static
 
 IF step_static=1
 
@@ -31,7 +29,6 @@ IF step_static=1
 
    WRITE SHM_OBJECT potencias vec_Q
    WRITE SHM_OBJECT temperaturas vec_T
-   WRITE SHM_OBJECT densidades vec_d
 
    SEM calcMil POST
    SEM calcMil WAIT
@@ -48,49 +45,64 @@ ELSE
 SEM calcOf WAIT
 
 READ SHM_OBJECT temperaturas vec_T
-#PRINT_VECTOR vec_T
 
 PRINT TEXT "\# temperatures read from OpenFOAM."
 
 # Inclusao das funcoes de interpolacao
-INCLUDE functions.was
+# function_wims.was: cross-sections from WIMS
+INCLUDE functions_wims.was
+
+PRINT TEXT "\# reading coupled data into mesh..." NONEWLINE
 
 MATERIAL fuel {
 D1	     d_1_fuel(T(x,y,z))
 SigmaA1      SigmaA_1_fuel(T(x,y,z))
 nuSigmaF1    SigmanuF_1_fuel(T(x,y,z))
-eSigmaF1     1
-SigmaS1.1    SigmaS1.1_fuel(T(x,y,z))
+eSigmaF1     nuSigmaF1(x,y,z)
+
+# SigmaS1.1    SigmaS1.1_fuel(T(x,y,z))
+
 SigmaS1.2    SigmaS1.2_fuel(T(x,y,z))
+
 D2           d_2_fuel(T(x,y,z))
 SigmaA2      SigmaA_2_fuel(T(x,y,z))
 nuSigmaF2    SigmanuF_2_fuel(T(x,y,z))(T(x,y,z))
-eSigmaF2     1
-SigmaS2.1    SigmaS2.1_fuel(T(x,y,z))
-SigmaS2.2    SigmaS1.2_fuel(T(x,y,z))
+eSigmaF2     nuSigmaF2(x,y,z)
+
+# SigmaS2.1    SigmaS2.1_fuel(T(x,y,z))
+# SigmaS2.2    SigmaS1.2_fuel(T(x,y,z))
 }
 
 MATERIAL cladding {
 D1	     d_1_cladding(T(x,y,z))
 SigmaA1      SigmaA_1_cladding(T(x,y,z))
-SigmaS1.1    SigmaS1.1_cladding(T(x,y,z))
+
+# SigmaS1.1    SigmaS1.1_cladding(T(x,y,z))
+
 SigmaS1.2    SigmaS1.2_cladding(T(x,y,z))
+
 D2           d_2_cladding(T(x,y,z))
 SigmaA2      SigmaA_2_cladding(T(x,y,z))
-SigmaS2.1    SigmaS2.1_cladding(T(x,y,z))
-SigmaS2.2    SigmaS1.2_cladding(T(x,y,z))
+
+# SigmaS2.1    SigmaS2.1_cladding(T(x,y,z))
+# SigmaS2.2    SigmaS1.2_cladding(T(x,y,z))
 }
 
 MATERIAL coolant {
 D1	     d_1_coolant(T(x,y,z))
 SigmaA1      SigmaA_1_coolant(T(x,y,z))
-SigmaS1.1    SigmaS1.1_coolant(T(x,y,z))
+
+# SigmaS1.1    SigmaS1.1_coolant(T(x,y,z))
+
 SigmaS1.2    SigmaS1.2_coolant(T(x,y,z))
+
 D2           d_2_coolant(T(x,y,z))
 SigmaA2      SigmaA_2_coolant(T(x,y,z))
-SigmaS2.1    SigmaS2.1_coolant(T(x,y,z))
-SigmaS2.2    SigmaS1.2_coolant(T(x,y,z))
+
+# SigmaS2.1    SigmaS2.1_coolant(T(x,y,z))
+# SigmaS2.2    SigmaS1.2_coolant(T(x,y,z))
 }
+PRINT TEXT " done."
 
 PHYSICAL_ENTITY NAME parede BC mirror
 PHYSICAL_ENTITY NAME extremos BC vacuum
@@ -124,7 +136,9 @@ WRITE SHM_OBJECT potencias vec_Q
 
 SEM calcMil POST
 
-# MESH_POST FILE_PATH teste4.vtk pow phi1
+PRINT TEXT "\# Writing vtk file..." NONEWLINE
+MESH_POST FILE_PATH teste4.vtk pow phi1
+PRINT TEXT " done."
 
 ENDIF
 
