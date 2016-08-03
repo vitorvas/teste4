@@ -1,0 +1,30 @@
+
+
+Wall heat fluxes [W]
+fuel_to_cladding -4231.96
+
+
+
+Wall heat fluxes [W]
+cladding_to_fuel 4239.37
+cladding_to_coolant -4368.03
+
+
+Wall heat fluxes [W]
+coolant_to_cladding 4376.41
+
+--------------------------------------------------------------------------------
+Metodologia para calcular o balanço de massa de dentro do Paraview:
+
+1) Calcular para o coolant.outlet em Calculator, T*U_Z/-0.1 (velocidade na entrada).
+   Com isso, as temperaturas serão ponderadas pelas velocidades de cada célula.
+
+2) Integrate variables: Tres (integrar o resultado obtido acima para todo o outlet)
+
+3) Dividir o Tres pela área usando o calculator.
+
+Esse valor de temperatura é comparado com o Tfinal calculado pelo programa
+em que são dados os valores de rho, Cp, Area, Tinicial, Q e U na entrada.
+
+BINGO.
+
