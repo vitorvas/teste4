@@ -33,8 +33,6 @@ boundaryField
         Tnbr            T;
         kappa           solidThermo;
         kappaName       none;
-        thicknessLayers ( 0.001 );
-        kappaLayers     ( 1 );
     }
 }
 
